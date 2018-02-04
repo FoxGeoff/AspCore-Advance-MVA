@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace MiddleWare
 {
@@ -18,15 +19,27 @@ namespace MiddleWare
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddConsole(LogLevel.Information);
+            var logger = loggerFactory.CreateLogger("Middleware Demo");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.Use(async (context, next) =>
+            {
+                logger.LogInformation($"==> beginning request in {env.EnvironmentName }");
+                await next();
+            });
+
+            app.UseStaticFiles();
+
             app.Run(async (context) =>
             {
+                context.Response.ContentType = "text/html";
                 await context.Response.WriteAsync("Hello World!");
             });
         }
