@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace MiddleWare
 {
@@ -31,8 +32,10 @@ namespace MiddleWare
 
             app.Use(async (context, next) =>
             {
-                logger.LogInformation($"==> beginning request in {env.EnvironmentName }");
+                var timer = Stopwatch.StartNew();
+                logger.LogInformation($"==> beginning request in {env.EnvironmentName}");
                 await next();
+                logger.LogInformation($"==> completed request {timer.ElapsedMilliseconds} ms");
             });
 
             app.UseStaticFiles();
